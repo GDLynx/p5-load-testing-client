@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Simple P5.js Load Testing Client</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.js"></script>
+</head>
+<body>
+    <script>
+    let loadTest = {
+        simulatedUsers: 0,
+        requestsPerInterval: 0,
+        webAddress: window.location.href, 
+        maxSeconds: 10
+    }
+
+    let users; // el 
+
+    function buttons(x, y, value) {
+    createButton("-").position(x, y).mousePressed(() => {
+        loadTest[value] -= 10;
+    }).addClass("lt-button");
+    createButton("+").position(x + 220, y).mousePressed(() => {
+        loadTest[value] += 10;
+    }).addClass("lt-button");
+    }
+
+    let loadTesting = true;
+
+    function setup() {
+        createCanvas(270, 120);
+        buttons(10, 10, "simulatedUsers");
+        buttons(10, 40, "requestsPerInterval");
+        buttons(10, 70, "maxSeconds");
+        let webAddress = createInput(window.location.href).position(10, 100); 
+        createButton("L-Test").mousePressed(() => {
+            loadTest.webAddress = window.location.href; 
+            console.log(loadTest); 
+            httpPost("http://localhost:3000/load-test", "json", loadTest, result => {
+                console.log(result); 
+            }, error => console.log(error))
+        }).position(200, 100); 
+    }
+
+    function draw() {
+        background(255, 20, 20);  
+        fill(30);
+        textSize(16); 
+        if (loadTesting) {
+            text("Simulate users: " + loadTest.simulatedUsers, 45, 26);
+            text("Requests per interval: " + loadTest.requestsPerInterval, 45, 56);
+            text("Test duration: " + loadTest.maxSeconds, 45, 86);
+            selectAll(".lt-button").forEach(b => b.show());
+        } else {
+            selectAll(".lt-button").forEach(b => b.hide());
+        }
+    }
+    </script>    
+</body>
+</html>
